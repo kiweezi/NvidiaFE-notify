@@ -12,8 +12,8 @@
 
 # -- Imports --
 
-import requests
-import json
+import requests     # Import requests for API.
+import json         # Import json for handling json.
 
 # -- End --
 
@@ -21,7 +21,8 @@ import json
 
 # -- Global Variables --
 
-URL = "https://api.nvidia.partners/edge/product/search?page=1&limit=9&locale=en-gb&search=nvidia&gpu=RTX%203080,RTX%203070&gpu_filter=RTX%203090~1,RTX%203080~1,RTX%203070~1,RTX%203060%20Ti~1,RTX%202080%20Ti~0,RTX%202080%20SUPER~0,RTX%202080~0,RTX%202070%20SUPER~0,RTX%202070~0,RTX%202060~0,GTX%201660%20Ti~0,GTX%201660%20SUPER~1,GTX%201660~0,GTX%201650%20Ti~0,GTX%201650%20SUPER~0,GTX%201650~5"
+# Define URL for the API request.
+APIurl = "https://api.nvidia.partners/edge/product/search?page=1&limit=9&locale=en-gb&search=nvidia&gpu=RTX%203080,RTX%203070&gpu_filter=RTX%203090~1,RTX%203080~1,RTX%203070~1,RTX%203060%20Ti~1,RTX%202080%20Ti~0,RTX%202080%20SUPER~0,RTX%202080~0,RTX%202070%20SUPER~0,RTX%202070~0,RTX%202060~0,GTX%201660%20Ti~0,GTX%201660%20SUPER~1,GTX%201660~0,GTX%201650%20Ti~0,GTX%201650%20SUPER~0,GTX%201650~5"
 
 # -- End --
 
@@ -32,7 +33,7 @@ def get_status():
     results = []
 
     # Get the API response and filter it.
-    response = requests.get(url = URL)
+    response = requests.get(url = APIurl)
     data = response.json()["searchedProducts"]["productDetails"]
 
     # Loop through products to find status.
