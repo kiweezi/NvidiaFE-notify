@@ -1,0 +1,4 @@
+# Excluded files and folders.
+
+# Remove vscode settings.
+/.vscode/
