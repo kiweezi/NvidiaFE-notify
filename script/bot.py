@@ -16,6 +16,8 @@ import requests                                         # For requests from the 
 import json                                             # For handling json.
 from discord import Webhook, RequestsWebhookAdapter     # For discord notifications.
 from win10toast import ToastNotifier                    # For Windows 10 toast notifications.
+from time import sleep                                  # For delay interval.
+from datetime import datetime                           # For displaying the system time.
 
 # -- End --
 
@@ -34,9 +36,13 @@ with open("cfg.json") as json_file:
 def get_data():
     # Get APIurl from config file.
     APIurl = config['APIurl']
+    # Set headers to use API as if from a browser.
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36'
+    }
 
     # Get the API response and filter it.
-    response = requests.get(url = APIurl)
+    response = requests.get(APIurl, headers=headers)
     data = response.json()["searchedProducts"]["productDetails"]
 
     # Return the data.
@@ -76,6 +82,9 @@ def alert(name, status, link):
 # -- Main --
 
 def main():
+    # Open the log file specified and overwrite it.
+    log = open(config['logfile'], "w")
+
     # Loop forever.
     while True:
         # Get the specified product data.
@@ -87,15 +96,29 @@ def main():
             name = products["displayName"]
             status = products["prdStatus"]
             link = products["retailers"][0]["purchaseLink"]
+
+            # Get the time and format it.
+            timeStamp = (datetime.now()).strftime("%H:%M:%S")
             # Output current process.
-            print ("Checking " + name + "...")
+            log.write("[" + timeStamp + "] Checking " + name + "...")
 
             if status != "out_of_stock":
+                # Wipe the contents of the file.
+                log.truncate(0)
+                # Get the time and format it.
+                timeStamp = (datetime.now()).strftime("%H:%M:%S")
                 # Output current status.
-                print ("~~~ Status for " + name + " changed! New status: " + status + " ~~~")
-                print ("~~~ Possible purchase link: " + link + " ~~~")
+                log.write ("[" + timeStamp + "] >>> Status for " + name + " changed! New status: " + status + " <<<")
+                log.write ("[" + timeStamp + "] >>> Retailer link: " + link + " <<<")
+
                 # Send notification alerts.
                 alert(name, status, link)
+
+        # Wait for time interval.
+        sleep(config['delay'])
+    
+    # Close the log file.
+    log.close()
 
 
 # Call the main code.
