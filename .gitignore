@@ -2,3 +2,4 @@
 
 # Remove vscode settings.
 /.vscode/
+/script/*.log
