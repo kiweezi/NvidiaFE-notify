@@ -12,8 +12,10 @@
 
 # -- Imports --
 
-import requests     # Import requests for API.
-import json         # Import json for handling json.
+import requests                                         # For requests from the API.
+import json                                             # For handling json.
+from discord import Webhook, RequestsWebhookAdapter     # For discord notifications.
+from win10toast import ToastNotifier                    # For Windows 10 toast notifications.
 
 # -- End --
 
@@ -43,12 +45,10 @@ def get_data():
 
 def alert(name, status, link):
 
-    # If discord hook is enabled, notify discord.
+    # If discord is enabled, notify discord.
     if config['discord']['enabled'] == True:
         # Get discord configuration.
         discordCfg = config['discord']
-        # Import discord library.
-        from discord import Webhook, RequestsWebhookAdapter
 
         # Create the message for the notification.
         message = ("**" + name + " status changed! " + " <@&" + discordCfg['roleID'] + ">**\n"
@@ -57,6 +57,19 @@ def alert(name, status, link):
         # Create webhook and send the message.
         webhook = Webhook.from_url(discordCfg['webhookUrl'], adapter=RequestsWebhookAdapter())
         webhook.send(message)
+
+    # If Windows 10 toast is enabled, create a toast notification.
+    if config['win10toast']['enabled'] == True:
+        # Get win10toast configuration.
+        iconPath = config['win10toast']['icon']
+
+        # Show toast notification.
+        toaster = ToastNotifier()
+        toaster.show_toast(name + "status changed",
+        "New status: '" + status + "'\n" + "Retailer link: " + link,
+        icon_path=iconPath,
+        duration=5,
+        threaded=True)
 
 
 
@@ -82,6 +95,7 @@ def main():
                 # Output current status.
                 print ("~~~ Status for " + name + " changed! New status: " + status + " ~~~")
                 print ("~~~ Possible purchase link: " + link + " ~~~")
+                # Send notification alerts.
                 alert(name, status, link)
 
 
