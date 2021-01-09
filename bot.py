@@ -41,8 +41,22 @@ def get_data():
     return data
 
 
+def alert(name, status, link):
 
+    # If discord hook is enabled, notify discord.
+    if config['discord']['enabled'] == True:
+        # Get discord configuration.
+        discordCfg = config['discord']
+        # Import discord library.
+        from discord import Webhook, RequestsWebhookAdapter
 
+        # Create the message for the notification.
+        message = ("**" + name + " status changed! " + " <@&" + discordCfg['roleID'] + ">**\n"
+        + ">>> New status: `" + status + "`\n" + ">>> Retailer link: " + link)
+
+        # Create webhook and send the message.
+        webhook = Webhook.from_url(discordCfg['webhookUrl'], adapter=RequestsWebhookAdapter())
+        webhook.send(message)
 
 
 
@@ -68,11 +82,7 @@ def main():
                 # Output current status.
                 print ("~~~ Status for " + name + " changed! New status: " + status + " ~~~")
                 print ("~~~ Possible purchase link: " + link + " ~~~")
-                # alert(name, status, link)
-
-
-
-
+                alert(name, status, link)
 
 
 # Call the main code.
