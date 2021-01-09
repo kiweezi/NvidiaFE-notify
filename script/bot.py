@@ -14,6 +14,7 @@
 
 import requests                                         # For requests from the API.
 import json                                             # For handling json.
+import os                                               # For handling file paths and sizes.
 from discord import Webhook, RequestsWebhookAdapter     # For discord notifications.
 from win10toast import ToastNotifier                    # For Windows 10 toast notifications.
 from time import sleep                                  # For delay interval.
@@ -30,6 +31,33 @@ with open("cfg.json") as json_file:
     config = json.load(json_file)
 
 # -- End --
+
+
+
+def check_logsize(log):
+    # Get logfile path.
+    logPath = config['logfile']['path']
+    # Get current size of log file.
+    fileSize = (os.stat(logPath).st_size / 1000)
+
+    # If the file size is bigger than specified, delete oldest 25%.
+    if fileSize >= config['logfile']['maxSize']:
+        # Close the file.
+        log.close()
+
+        # Get the lines to cut from the file.
+        with open(logPath, 'r') as fin:
+            data = fin.read().splitlines(True)
+            cut = int(len(data) / 4)
+        # Cut 25% of the log file lines.
+        with open(logPath, 'w') as fout:
+            fout.writelines(data[cut:])
+
+        # Open the file back up again.
+        log = open(logPath, "a")
+    
+    # Return the processed or uneditted logs.
+    return log
 
 
 
@@ -83,42 +111,57 @@ def alert(name, status, link):
 
 def main():
     # Open the log file specified and overwrite it.
-    log = open(config['logfile'], "w")
+    log = open(config['logfile']['path'], "a")
 
-    # Loop forever.
-    while True:
-        # Get the specified product data.
-        data = get_data()
+    # Loop as long as keyboard interrupt is not triggered.
+    try:
+        while True:
+            # Get the specified product data.
+            data = get_data()
 
-        # Loop through products to find status.
-        for products in data:
-            # Get the details of the product required.
-            name = products["displayName"]
-            status = products["prdStatus"]
-            link = products["retailers"][0]["purchaseLink"]
+            # Loop through products to find status.
+            for products in data:
+                # Get the details of the product required.
+                name = products["displayName"]
+                status = products["prdStatus"]
+                link = products["retailers"][0]["purchaseLink"]
 
-            # Get the time and format it.
-            timeStamp = (datetime.now()).strftime("%H:%M:%S")
-            # Output current process.
-            log.write("[" + timeStamp + "] Checking " + name + "...")
-
-            if status != "out_of_stock":
-                # Wipe the contents of the file.
-                log.truncate(0)
                 # Get the time and format it.
                 timeStamp = (datetime.now()).strftime("%H:%M:%S")
-                # Output current status.
-                log.write ("[" + timeStamp + "] >>> Status for " + name + " changed! New status: " + status + " <<<")
-                log.write ("[" + timeStamp + "] >>> Retailer link: " + link + " <<<")
+                # Output current process and update file.
+                log.writelines("[" + timeStamp + "] Checking " + name + "...\n")
+                log.flush()
 
-                # Send notification alerts.
-                alert(name, status, link)
+                if status != "out_of_stock":
+                    # Wipe the contents of the file.
+                    log.truncate(0)
+                    # Get the time and format it.
+                    timeStamp = str((datetime.now()).strftime("%H:%M:%S"))
+                    # Output current status and update.
+                    log.write ("[" + timeStamp + "] >>> Status for " + name + " changed! New status: " + status + " <<<\n"
+                        + "[" + timeStamp + "] >>> Retailer link: " + link + " <<<\n")
+                    log.flush()
 
-        # Wait for time interval.
-        sleep(config['delay'])
+                    # Send notification alerts.
+                    alert(name, status, link)
+            
+            # If the file size is bigger than specified, delete oldest 25%.
+            log = check_logsize(log)
+
+            # Wait for time interval.
+            sleep(config['delay'])
     
-    # Close the log file.
-    log.close()
+
+    # Loop as long as keyboard interrupt is not triggered.
+    except KeyboardInterrupt:
+        # Display an exiting log.
+        log.write("Exiting...")
+        print ("Exiting...")
+        # Close the log file.
+        log.close()
+        pass
+
+    
 
 
 # Call the main code.
