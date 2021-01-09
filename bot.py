@@ -52,7 +52,7 @@ def alert(name, status, link):
 
         # Create the message for the notification.
         message = ("**" + name + " status changed! " + " <@&" + discordCfg['roleID'] + ">**\n"
-        + ">>> New status: `" + status + "`\n" + ">>> Retailer link: " + link)
+        + ">>> New status: `" + status + "`\n" + "Retailer link: " + link)
 
         # Create webhook and send the message.
         webhook = Webhook.from_url(discordCfg['webhookUrl'], adapter=RequestsWebhookAdapter())
@@ -66,7 +66,7 @@ def alert(name, status, link):
         # Show toast notification.
         toaster = ToastNotifier()
         toaster.show_toast(name + "status changed",
-        "New status: '" + status + "'\n" + "Retailer link: " + link,
+        "New status: '" + status + "'\n" + " Retailer link: " + link,
         icon_path=iconPath,
         duration=5,
         threaded=True)
