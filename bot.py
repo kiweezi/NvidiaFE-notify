@@ -21,46 +21,58 @@ import json         # Import json for handling json.
 
 # -- Global Variables --
 
-# Define URL for the API request.
-APIurl = "https://api.nvidia.partners/edge/product/search?page=1&limit=9&locale=en-gb&search=nvidia&gpu=RTX%203080,RTX%203070&gpu_filter=RTX%203090~1,RTX%203080~1,RTX%203070~1,RTX%203060%20Ti~1,RTX%202080%20Ti~0,RTX%202080%20SUPER~0,RTX%202080~0,RTX%202070%20SUPER~0,RTX%202070~0,RTX%202060~0,GTX%201660%20Ti~0,GTX%201660%20SUPER~1,GTX%201660~0,GTX%201650%20Ti~0,GTX%201650%20SUPER~0,GTX%201650~5"
+# DeGet the URL for the API request from the json file.
+with open("cfg.json") as json_file:
+    config = json.load(json_file)
 
 # -- End --
 
 
 
-def get_status():
-    # Define array to store results.
-    results = []
+def get_data():
+    # Get APIurl from config file.
+    APIurl = config['APIurl']
 
     # Get the API response and filter it.
     response = requests.get(url = APIurl)
     data = response.json()["searchedProducts"]["productDetails"]
 
-    # Loop through products to find status.
-    for products in data:
-        # Get the details of the product required.
-        name = products["displayName"]
-        status = products["prdStatus"]
-        link = products["retailers"][0]["purchaseLink"]
+    # Return the data.
+    return data
 
-        # Add to results.
-        results.append([name, status, link])
 
-    # Return the results.
-    return results
+
+
 
 
 
 # -- Main --
 
 def main():
-    # Get the products and their status.
-    status = get_status()
-    print (status)
+    # Loop forever.
+    while True:
+
+        # Get the specified product data.
+        data = get_data()
+
+        # Loop through products to find status.
+        for products in data:
+            # Get the details of the product required.
+            name = products["displayName"]
+            status = products["prdStatus"]
+            link = products["retailers"][0]["purchaseLink"]
+            # Output current process.
+            print ("Checking " + name + "...")
+
+            if status != "out_of_stock":
+                # Output current status.
+                print ("~~~ Status for " + name + " changed! New status: " + status + " ~~~")
+                print ("~~~ Possible purchase link: " + link + " ~~~")
+                # alert(name, status, link)
 
 
-    # result = json.dumps(data, indent= 4)
-    #print (result)
+
+
 
 
 # Call the main code.

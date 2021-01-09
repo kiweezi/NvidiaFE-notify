@@ -1,0 +1,5 @@
+{
+	"discordHook": true,
+	"win10Toast": false,
+	"APIurl": "https://api.nvidia.partners/edge/product/search?page=1&limit=9&locale=en-gb&search=nvidia&gpu=RTX%203080,RTX%203070&gpu_filter=RTX%203090~1,RTX%203080~1,RTX%203070~1,RTX%203060%20Ti~1,RTX%202080%20Ti~0,RTX%202080%20SUPER~0,RTX%202080~0,RTX%202070%20SUPER~0,RTX%202070~0,RTX%202060~0,GTX%201660%20Ti~0,GTX%201660%20SUPER~1,GTX%201660~0,GTX%201650%20Ti~0,GTX%201650%20SUPER~0,GTX%201650~5"
+}
