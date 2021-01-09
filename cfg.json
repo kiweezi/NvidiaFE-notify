@@ -9,6 +9,6 @@
 
 	"win10toast": {
 		"enabled": true,
-		"icon": "toast.icon"
+		"icon": "toast.ico"
 	}
 }
