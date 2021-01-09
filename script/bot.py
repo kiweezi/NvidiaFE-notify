@@ -78,7 +78,6 @@ def alert(name, status, link):
 def main():
     # Loop forever.
     while True:
-
         # Get the specified product data.
         data = get_data()
 
