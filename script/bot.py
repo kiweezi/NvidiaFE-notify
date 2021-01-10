@@ -36,7 +36,7 @@ with open("cfg.json") as json_file:
 
 def check_logsize(log):
     # Get logfile path.
-    logPath = config['logfile']['path']
+    logPath = os.path.abspath(config['logfile']['path'])
     # Get current size of log file.
     fileSize = (os.stat(logPath).st_size / 1000)
 
@@ -95,7 +95,7 @@ def alert(name, status, link):
     # If Windows 10 toast is enabled, create a toast notification.
     if config['win10toast']['enabled'] == True:
         # Get win10toast configuration.
-        iconPath = config['win10toast']['icon']
+        iconPath = os.path.abspath(config['win10toast']['icon'])
 
         # Show toast notification.
         toaster = ToastNotifier()
@@ -111,7 +111,7 @@ def alert(name, status, link):
 
 def main():
     # Open the log file specified and overwrite it.
-    log = open(config['logfile']['path'], "a")
+    log = open(os.path.abspath(config['logfile']['path']), "a")
 
     # Loop as long as keyboard interrupt is not triggered.
     try:
