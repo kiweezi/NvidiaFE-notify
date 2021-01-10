@@ -15,6 +15,7 @@
 import requests                                         # For requests from the API.
 import json                                             # For handling json.
 import os                                               # For handling file paths and sizes.
+import sys                                              # For arguments and script control.
 from discord import Webhook, RequestsWebhookAdapter     # For discord notifications.
 from win10toast import ToastNotifier                    # For Windows 10 toast notifications.
 from time import sleep                                  # For delay interval.
@@ -26,35 +27,53 @@ from datetime import datetime                           # For displaying the sys
 
 # -- Global Variables --
 
-# DeGet the URL for the API request from the json file.
+# Get the URL for the API request from the json file.
 with open("cfg.json") as json_file:
     config = json.load(json_file)
+
+# Location of the flag file for stopping and starting through commandline.
+FLAGFILENAME = "startstop.file"
 
 # -- End --
 
 
 
+def set_file_flag(startorstop):
+    # If the flag is to be set to true, create the flag file.
+    if startorstop:
+        with open(FLAGFILENAME, "w") as f:
+            f.write('run')
+    # If the flag is to be set to false, delete the flag file.
+    else:
+        if os.path.isfile(FLAGFILENAME):
+            os.unlink(FLAGFILENAME)
+
+def is_flag_set():
+    # Return if the file exists.
+    return os.path.isfile(FLAGFILENAME)
+
+
 def check_logsize(log):
     # Get logfile path.
-    logPath = os.path.abspath(config['logfile']['path'])
+    log_path = os.path.abspath(config['logfile']['path'])
     # Get current size of log file.
-    fileSize = (os.stat(logPath).st_size / 1000)
+    file_size = (os.stat(log_path).st_size / 1000)
 
     # If the file size is bigger than specified, delete oldest 25%.
-    if fileSize >= config['logfile']['maxSize']:
+    if file_size >= config['logfile']['maxSize']:
         # Close the file.
         log.close()
 
         # Get the lines to cut from the file.
-        with open(logPath, 'r') as fin:
+        with open(log_path, 'r') as fin:
             data = fin.read().splitlines(True)
             cut = int(len(data) / 4)
         # Cut 25% of the log file lines.
-        with open(logPath, 'w') as fout:
+        with open(log_path, 'w') as fout:
             fout.writelines(data[cut:])
 
         # Open the file back up again.
-        log = open(logPath, "a")
+        log = open(log_path, "a")
     
     # Return the processed or uneditted logs.
     return log
@@ -63,14 +82,14 @@ def check_logsize(log):
 
 def get_data():
     # Get APIurl from config file.
-    APIurl = config['APIurl']
+    api_url = config['APIurl']
     # Set headers to use API as if from a browser.
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36'
     }
 
     # Get the API response and filter it.
-    response = requests.get(APIurl, headers=headers)
+    response = requests.get(api_url, headers=headers)
     data = response.json()["searchedProducts"]["productDetails"]
 
     # Return the data.
@@ -82,26 +101,26 @@ def alert(name, status, link):
     # If discord is enabled, notify discord.
     if config['discord']['enabled'] == True:
         # Get discord configuration.
-        discordCfg = config['discord']
+        discord_cfg = config['discord']
 
         # Create the message for the notification.
-        message = ("**" + name + " status changed! " + " <@&" + discordCfg['roleID'] + ">**\n"
+        message = ("**" + name + " status changed! " + " <@&" + discord_cfg['roleID'] + ">**\n"
         + ">>> New status: `" + status + "`\n" + "Retailer link: " + link)
 
         # Create webhook and send the message.
-        webhook = Webhook.from_url(discordCfg['webhookUrl'], adapter=RequestsWebhookAdapter())
+        webhook = Webhook.from_url(discord_cfg['webhookUrl'], adapter=RequestsWebhookAdapter())
         webhook.send(message)
 
     # If Windows 10 toast is enabled, create a toast notification.
     if config['win10toast']['enabled'] == True:
         # Get win10toast configuration.
-        iconPath = os.path.abspath(config['win10toast']['icon'])
+        icon_file = os.path.abspath(config['win10toast']['icon'])
 
         # Show toast notification.
         toaster = ToastNotifier()
         toaster.show_toast(name + "status changed",
         "New status: '" + status + "'\n" + " Retailer link: " + link,
-        icon_path=iconPath,
+        icon_path=icon_file,
         duration=5,
         threaded=True)
 
@@ -113,53 +132,66 @@ def main():
     # Open the log file specified and overwrite it.
     log = open(os.path.abspath(config['logfile']['path']), "a")
 
-    # Loop as long as keyboard interrupt is not triggered.
-    try:
-        while True:
-            # Get the specified product data.
-            data = get_data()
+    # If incorrect arguments are provided, display usage and quit.
+    if len(sys.argv) < 2:
+        message = "Usage: <program> start|stop"
+        log.write(message); log.flush()
+        print (message)
+        sys.exit()
+    
+    # Store the argument used.
+    start_stop = sys.argv[1]
+    # If program is called to start, set the start flag.
+    if start_stop == 'start':
+        log.write("Starting..."); log.flush()
+        set_file_flag(True)
 
-            # Loop through products to find status.
-            for products in data:
-                # Get the details of the product required.
-                name = products["displayName"]
-                status = products["prdStatus"]
-                link = products["retailers"][0]["purchaseLink"]
+    # If program is called to stop, set the stop flag.
+    if start_stop == 'stop':
+        log.write("Stopping..."); log.flush()
+        set_file_flag(False)
 
+    # While the program is set to start, continue running.
+    while is_flag_set():
+        # Get the specified product data.
+        data = get_data()
+
+        # Loop through products to find status.
+        for products in data:
+            # Get the details of the product required.
+            name = products["displayName"]
+            status = products["prdStatus"]
+            link = products["retailers"][0]["purchaseLink"]
+
+            # Get the time and format it.
+            time_stamp = (datetime.now()).strftime("%H:%M:%S")
+            # Output current process and update file.
+            log.writelines("[" + time_stamp + "] Checking " + name + "...\n"); log.flush()
+
+            if status != "out_of_stock":
+                # Wipe the contents of the file.
+                log.truncate(0)
                 # Get the time and format it.
-                timeStamp = (datetime.now()).strftime("%H:%M:%S")
-                # Output current process and update file.
-                log.writelines("[" + timeStamp + "] Checking " + name + "...\n")
-                log.flush()
+                time_stamp = str((datetime.now()).strftime("%H:%M:%S"))
+                # Output current status and update.
+                log.write ("[" + time_stamp + "] >>> Status for " + name + " changed! New status: " + status + " <<<\n"
+                    + "[" + time_stamp + "] >>> Retailer link: " + link + " <<<\n"); log.flush()
 
-                if status != "out_of_stock":
-                    # Wipe the contents of the file.
-                    log.truncate(0)
-                    # Get the time and format it.
-                    timeStamp = str((datetime.now()).strftime("%H:%M:%S"))
-                    # Output current status and update.
-                    log.write ("[" + timeStamp + "] >>> Status for " + name + " changed! New status: " + status + " <<<\n"
-                        + "[" + timeStamp + "] >>> Retailer link: " + link + " <<<\n")
-                    log.flush()
+                # Send notification alerts.
+                alert(name, status, link)
+        
+        # If the file size is bigger than specified, delete oldest 25%.
+        log = check_logsize(log)
 
-                    # Send notification alerts.
-                    alert(name, status, link)
-            
-            # If the file size is bigger than specified, delete oldest 25%.
-            log = check_logsize(log)
-
-            # Wait for time interval.
-            sleep(config['delay'])
+        # Wait for time interval.
+        sleep(config['delay'])
     
 
-    # Loop as long as keyboard interrupt is not triggered.
-    except KeyboardInterrupt:
-        # Display an exiting log.
-        log.write("Exiting...")
-        print ("Exiting...")
-        # Close the log file.
-        log.close()
-        pass
+    # Log that the program is stopping.
+    log.write("Stopped")
+    log.flush()
+    # Close the log file.
+    log.close()
 
     
 
