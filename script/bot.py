@@ -134,21 +134,20 @@ def main():
 
     # If incorrect arguments are provided, display usage and quit.
     if len(sys.argv) < 2:
-        message = "Usage: <program> start|stop"
+        message = "Usage: <program> start|stop\n"
         log.write(message); log.flush()
-        print (message)
         sys.exit()
     
     # Store the argument used.
     start_stop = sys.argv[1]
     # If program is called to start, set the start flag.
     if start_stop == 'start':
-        log.write("Starting..."); log.flush()
+        log.write("Starting...\n"); log.flush()
         set_file_flag(True)
 
     # If program is called to stop, set the stop flag.
     if start_stop == 'stop':
-        log.write("Stopping..."); log.flush()
+        log.write("Stopping...\n"); log.flush()
         set_file_flag(False)
 
     # While the program is set to start, continue running.
@@ -188,7 +187,7 @@ def main():
     
 
     # Log that the program is stopping.
-    log.write("Stopped")
+    log.write("Stopped\n")
     log.flush()
     # Close the log file.
     log.close()
