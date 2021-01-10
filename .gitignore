@@ -3,3 +3,4 @@
 # Remove vscode settings.
 /.vscode/
 /script/*.log
+/startstop.file
