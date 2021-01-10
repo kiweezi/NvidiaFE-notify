@@ -1,2 +1,2 @@
-# nvidia-bot
-A bot which notifies the user of selected Nvidia products becoming in stock.
+# NvidiaFE-notify
+Notify Discord or Win10 of Nvidia Founders Edition card stock. 
