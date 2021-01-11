@@ -16,8 +16,6 @@ import requests                                         # For requests from the 
 import json                                             # For handling json.
 import os                                               # For handling file paths and sizes.
 import sys                                              # For arguments and script control.
-from discord import Webhook, RequestsWebhookAdapter     # For discord notifications.
-from win10toast import ToastNotifier                    # For Windows 10 toast notifications.
 from time import sleep                                  # For delay interval.
 from datetime import datetime                           # For displaying the system time.
 
@@ -36,6 +34,16 @@ FLAGFILENAME = "startstop.file"
 
 # -- End --
 
+
+
+def get_imports ():
+    # If discord is selected, import it.
+    if (config['discord']['enabled'] == True):
+        from discord import Webhook, RequestsWebhookAdapter     # For discord notifications.
+
+    # If win10toast is selected, import it.
+    if config['win10toast']['enabled'] == True:
+        from win10toast import ToastNotifier                    # For Windows 10 toast notifications.
 
 
 def set_file_flag(startorstop):
@@ -152,6 +160,8 @@ def main():
 
     # While the program is set to start, continue running.
     while is_flag_set():
+        # Get additional imports used in the code.
+        get_imports()
         # Get the specified product data.
         data = get_data()
 
