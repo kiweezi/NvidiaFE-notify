@@ -49,6 +49,7 @@ if config['win10toast']['enabled'] == True:
     from win10toast import ToastNotifier                    # For Windows 10 toast notifications.
 
 
+
 def set_file_flag(startorstop):
     # If the flag is to be set to true, create the flag file.
     if startorstop:
@@ -88,7 +89,6 @@ def check_logsize(log):
     
     # Return the processed or uneditted logs.
     return log
-
 
 
 def get_data():
