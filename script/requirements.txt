@@ -1,4 +1,3 @@
 requests
 discord
 discord.py
-win10toast
