@@ -10,6 +10,9 @@
 
 
 
+# Shebang
+#!/usr/bin/env python3
+
 # -- Imports --
 
 import requests                                         # For requests from the API.
@@ -36,14 +39,14 @@ FLAGFILENAME = "startstop.file"
 
 
 
-def get_imports ():
-    # If discord is selected, import it.
-    if (config['discord']['enabled'] == True):
-        from discord import Webhook, RequestsWebhookAdapter     # For discord notifications.
+# Get additional imports used in the code.
+# If discord is selected, import it.
+if (config['discord']['enabled'] == True):
+    from discord import Webhook, RequestsWebhookAdapter     # For discord notifications.
 
-    # If win10toast is selected, import it.
-    if config['win10toast']['enabled'] == True:
-        from win10toast import ToastNotifier                    # For Windows 10 toast notifications.
+# If win10toast is selected, import it.
+if config['win10toast']['enabled'] == True:
+    from win10toast import ToastNotifier                    # For Windows 10 toast notifications.
 
 
 def set_file_flag(startorstop):
@@ -160,8 +163,6 @@ def main():
 
     # While the program is set to start, continue running.
     while is_flag_set():
-        # Get additional imports used in the code.
-        get_imports()
         # Get the specified product data.
         data = get_data()
 
