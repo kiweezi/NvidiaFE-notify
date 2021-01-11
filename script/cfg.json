@@ -14,7 +14,7 @@
 	},
 
 	"win10toast": {
-		"enabled": true,
+		"enabled": false,
 		"icon": "toast.ico"
 	}
 }
