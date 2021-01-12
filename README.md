@@ -45,36 +45,36 @@ It is recommended that you enable at least one notification method, as the progr
     - **value**: number (can be decimal)
     - **description**: The time paused before the next query to the API specified. This can be set to anything above zero.
 ### logfile
-    - | path |
-      |------|
-        - **value**: file path
-        - **description**: Path to store the logs from the script. Supports OS paths.
-    - | maxSize |
-      |---------|
-        - **value**: number (integer)
-        - **description**: The maximum size the log file can grow to, measured in Kb.
+- | path |
+  |------|
+    - **value**: file path
+    - **description**: Path to store the logs from the script. Supports OS paths.
+- | maxSize |
+  |---------|
+    - **value**: number (integer)
+    - **description**: The maximum size the log file can grow to, measured in Kb.
 ### discord
-    - | enabled |
-      |---------|
-        - **value**: true or false
-        - **description**: Determines whether Discord alerts are to be used.
-    - | webhookUrl |
-      |------------|
-        - **value**: text
-        - **description**: The url webhook from Discord collected in the [optional](#optional) requirements.
-    - | roleID |
-      |--------|
-        - **value**: number
-        - **description**: The identifying, numerical code for a role to mention on the Discord server in the alert message sent.
+- | enabled |
+  |---------|
+    - **value**: true or false
+    - **description**: Determines whether Discord alerts are to be used.
+- | webhookUrl |
+  |------------|
+    - **value**: text
+    - **description**: The url webhook from Discord collected in the [optional](#optional) requirements.
+- | roleID |
+  |--------|
+    - **value**: number
+    - **description**: The identifying, numerical code for a role to mention on the Discord server in the alert message sent.
 ### win10toast
-    - | enabled |
-      |---------|
-        - **value**: true or false
-        - **description**: Determines whether win10toast alerts are to be used.
-    - | icon |
-      |------|
-        - **value**: file path
-        - **description**: Path to the icon file used in the notification. Supports OS paths.
+- | enabled |
+  |---------|
+    - **value**: true or false
+    - **description**: Determines whether win10toast alerts are to be used.
+- | icon |
+  |------|
+    - **value**: file path
+    - **description**: Path to the icon file used in the notification. Supports OS paths.
 
 
 ## Usage
