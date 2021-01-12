@@ -36,7 +36,7 @@ Notify Discord or Win10 of **European** Nvidia Founders Edition card stock. Cont
 ## Configure
 Change the behaviour of the program with the `cfg.json` file. The program will run without any additional configuration, but alerts are disabled by default.
 
-It is recommended that you enable at least one notification method, as the program serves almost no purpose without it. See the settings below.
+It is recommended that you enable at least one notification method, as the program serves almost no purpose without it. See the settings below:
 
 ### APIurl
 - **value**: valid url
@@ -83,7 +83,7 @@ NvidiaFE-notify is a command line controled script. Use arguments `start` and `s
 The script must be run in the background on a separate thread as to not pause the command line.
 
 In Linux bash the script can be started with the `&` character at the end:
-```bash
+```console
 usr@linux:~$ python bot.py start &
 ```
 In Windows the script can be stopped in PowerShell by using **pythonw.exe**, which allows the script to run silently.
@@ -96,7 +96,7 @@ PS C:\Users\Usr> & pythonw.exe .\bot.py stop
 The `test` argument can be provided to the script to test the alerts currently configured in `cfg.json`.
 
 For Linux bash:
-```bash
+```console
 usr@linux:~$ python bot.py test &
 ```
 For Windows PowerShell:
@@ -105,4 +105,4 @@ PS C:\Users\Usr> & pythonw.exe .\bot.py test
 ```
 
 
-## Please give me issues, this is just a means of learning for me.
+### Please give me issues, this is just a means of learning for me.
