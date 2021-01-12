@@ -107,7 +107,12 @@ def get_data():
     return data
 
 
-def alert(name, status, link):
+def alert(name, status, link, log):
+    # Get the time and format it.
+    time_stamp = str((datetime.now()).strftime("%H:%M:%S"))
+    # Output current status and update.
+    log.write ("[" + time_stamp + "] >>> Status for " + name + " changed! New status: " + status + " <<<\n"
+        + "[" + time_stamp + "] >>> Retailer link: " + link + " <<<\n"); log.flush()
 
     # If discord is enabled, notify discord.
     if config['discord']['enabled'] == True:
@@ -145,21 +150,26 @@ def main():
 
     # If incorrect arguments are provided, display usage and quit.
     if len(sys.argv) < 2:
-        message = "Usage: <program> start|stop\n"
+        message = "Usage: <program> start|stop|test\n"
         log.write(message); log.flush()
         sys.exit()
     
     # Store the argument used.
-    start_stop = sys.argv[1]
+    instruction = sys.argv[1]
     # If program is called to start, set the start flag.
-    if start_stop == 'start':
+    if instruction == 'start':
         log.write("Starting...\n"); log.flush()
         set_file_flag(True)
 
     # If program is called to stop, set the stop flag.
-    if start_stop == 'stop':
+    elif instruction == 'stop':
         log.write("Stopping...\n"); log.flush()
         set_file_flag(False)
+
+
+    elif instruction == 'test':
+        log.write("Testing...\n"); log.flush()
+        alert("Nvidia Test Card", "test_run", "https://github.com/kiweezi/NvidiaFE-notify", log)
 
     # While the program is set to start, continue running.
     while is_flag_set():
@@ -179,16 +189,8 @@ def main():
             log.writelines("[" + time_stamp + "] Checking " + name + "...\n"); log.flush()
 
             if status != "out_of_stock":
-                # Wipe the contents of the file.
-                log.truncate(0)
-                # Get the time and format it.
-                time_stamp = str((datetime.now()).strftime("%H:%M:%S"))
-                # Output current status and update.
-                log.write ("[" + time_stamp + "] >>> Status for " + name + " changed! New status: " + status + " <<<\n"
-                    + "[" + time_stamp + "] >>> Retailer link: " + link + " <<<\n"); log.flush()
-
                 # Send notification alerts.
-                alert(name, status, link)
+                alert(name, status, link, log)
         
         # If the file size is bigger than specified, delete oldest 25%.
         log = check_logsize(log)
