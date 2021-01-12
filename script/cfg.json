@@ -10,7 +10,7 @@
 	"discord": {
 		"enabled": false,
 		"webhookUrl": "",
-		"roleID": ""
+		"roleID": 999999999999999999
 	},
 
 	"win10toast": {

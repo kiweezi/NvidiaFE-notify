@@ -115,7 +115,7 @@ def alert(name, status, link):
         discord_cfg = config['discord']
 
         # Create the message for the notification.
-        message = ("**" + name + " status changed! " + " <@&" + discord_cfg['roleID'] + ">**\n"
+        message = ("**" + name + " status changed! " + " <@&" + str(discord_cfg['roleID']) + ">**\n"
         + ">>> New status: `" + status + "`\n" + "Retailer link: " + link)
 
         # Create webhook and send the message.
