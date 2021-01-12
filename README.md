@@ -39,11 +39,11 @@ Change the behaviour of the program with the `cfg.json` file. The program will r
 It is recommended that you enable at least one notification method, as the program serves almost no purpose without it. See the settings below.
 
 ### APIurl
-    - **value**: valid url
-    - **description**: API url to query Nvidia's product page. You can get your own with this guide.
+- **value**: valid url
+- **description**: API url to query Nvidia's product page. You can get your own with this guide.
 ### delay
-    - **value**: number (can be decimal)
-    - **description**: The time paused before the next query to the API specified. This can be set to anything above zero.
+- **value**: number (can be decimal)
+- **description**: The time paused before the next query to the API specified. This can be set to anything above zero.
 ### logfile
 - | path |
   |------|
