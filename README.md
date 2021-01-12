@@ -79,14 +79,13 @@ It is recommended that you enable at least one notification method, as the progr
 
 ## Usage
 NvidiaFE-notify is a command line controled script. Use arguments `start` and `stop` to start and stop the script from running.
-
 The script must be run in the background on a separate thread as to not pause the command line.
 
 In Linux bash the script can be started with the `&` character at the end:
 ```console
 usr@linux:~$ python bot.py start &
 ```
-In Windows the script can be stopped in PowerShell by using **pythonw.exe**, which allows the script to run silently.
+In Windows the script can be stopped in PowerShell by using `pythonw.exe`, which allows the script to run silently.
 ```powershell
 PS C:\Users\Usr> & pythonw.exe .\bot.py stop
 ```
