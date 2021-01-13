@@ -111,8 +111,8 @@ def alert(name, status, link, log):
     # Get the time and format it.
     time_stamp = str((datetime.now()).strftime("%H:%M:%S"))
     # Output current status and update.
-    log.write ("[" + time_stamp + "] >>> Status for " + name + " changed! New status: " + status + " <<<\n"
-        + "[" + time_stamp + "] >>> Retailer link: " + link + " <<<\n"); log.flush()
+    log.write ("[" + time_stamp + "] >>> Status for " + name + " changed! New status: " + status + "\n"
+        + "[" + time_stamp + "] >>> Retailer link: " + link + "\n"); log.flush()
 
     # If discord is enabled, notify discord.
     if config['discord']['enabled'] == True:
@@ -160,8 +160,14 @@ def main():
     if instruction == 'start':
         log.write("Starting...\n"); log.flush()
         set_file_flag(True)
-        # Set variable outside of the while loop.
-        pause_alert = False
+
+        # Initialize default alert status for each product.
+        alert_status = {}
+        # Set default alert status.
+        data = get_data(log)
+        # For each product, set the default alert status.
+        for product in data:
+            alert_status[product["displayName"]] = False
 
     # If program is called to stop, set the stop flag and exit.
     elif instruction == 'stop':
@@ -183,11 +189,11 @@ def main():
             data = get_data(log)
 
             # Loop through products to find status.
-            for products in data:
+            for product in data:
                 # Get the details of the product required.
-                name = products["displayName"]
-                status = products["prdStatus"]
-                link = products["retailers"][0]["purchaseLink"]
+                name = product["displayName"]
+                status = product["prdStatus"]
+                link = product["retailers"][0]["purchaseLink"]
 
                 # Get the time and format it.
                 time_stamp = (datetime.now()).strftime("%H:%M:%S")
@@ -195,15 +201,16 @@ def main():
                 log.writelines("[" + time_stamp + "] Checking " + name + "...\n"); log.flush()
 
                 # If the status is not out of stock, notify once.
-                if status != "out_of_stock" and pause_alert == False:
+                if status != "out_of_stock" and alert_status[name] == False:
                     # Send notification alerts.
                     alert(name, status, link, log)
-                    # Pause the alert until the item is out of stock again.
-                    pause_alert = True
+                    # Set timeout for alert.
+                    alert_status[name] = True
                 
                 # If the item is out of stock, enable alerts again.
-                elif status == "out_of_stock":
-                    pause_alert = False
+                elif status == "out_of_stock" and alert_status[name] == True:
+                    # Disable timeout for alert.
+                    alert_status[name] = False
 
         # If the API is not responding, log this.
         except:
