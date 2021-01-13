@@ -99,18 +99,10 @@ def get_data(log):
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36'
     }
 
-    # Try to query the API.
-    try:
-        # Get the API response and filter it.
-        response = requests.get(api_url, headers=headers)
-    # If the API is down take the exeception and log it.
-    except:
-        # Get the time and format it.
-        time_stamp = str((datetime.now()).strftime("%H:%M:%S"))
-        log.write("[" + time_stamp + "] Connection failed...")
-
-    # Refine the response.
+    # Get the API response and filter it.
+    response = requests.get(api_url, headers=headers)
     data = response.json()["searchedProducts"]["productDetails"]
+
     # Return the data.
     return data
 
@@ -171,57 +163,65 @@ def main():
         # Set variable outside of the while loop.
         pause_alert = False
 
-    # If program is called to stop, set the stop flag.
+    # If program is called to stop, set the stop flag and exit.
     elif instruction == 'stop':
         log.write("Stopping...\n"); log.flush()
         set_file_flag(False)
+        sys.exit()
 
-
+    # If program is called to test, send a test alert.
     elif instruction == 'test':
         log.write("Testing...\n"); log.flush()
         alert("Nvidia Test Card", "test_run", "https://github.com/kiweezi/NvidiaFE-notify", log)
 
     # While the program is set to start, continue running.
     while is_flag_set():
-        # Get the specified product data.
-        data = get_data(log)
 
-        # Loop through products to find status.
-        for products in data:
-            # Get the details of the product required.
-            name = products["displayName"]
-            status = products["prdStatus"]
-            link = products["retailers"][0]["purchaseLink"]
+        # If the API is working as intended, run the main script.
+        try:
+            # Get the specified product data.
+            data = get_data(log)
 
-            # Get the time and format it.
-            time_stamp = (datetime.now()).strftime("%H:%M:%S")
-            # Output current process and update file.
-            log.writelines("[" + time_stamp + "] Checking " + name + "...\n"); log.flush()
+            # Loop through products to find status.
+            for products in data:
+                # Get the details of the product required.
+                name = products["displayName"]
+                status = products["prdStatus"]
+                link = products["retailers"][0]["purchaseLink"]
 
-            # If the status is not out of stock, notify once.
-            if status != "out_of_stock" and pause_alert == False:
-                # Send notification alerts.
-                alert(name, status, link, log)
-                # Pause the alert until the item is out of stock again.
-                pause_alert = True
-            
-            # If the item is out of stock, enable alerts again.
-            elif status == "out_of_stock":
-                pause_alert = False
+                # Get the time and format it.
+                time_stamp = (datetime.now()).strftime("%H:%M:%S")
+                # Output current process and update file.
+                log.writelines("[" + time_stamp + "] Checking " + name + "...\n"); log.flush()
+
+                # If the status is not out of stock, notify once.
+                if status != "out_of_stock" and pause_alert == False:
+                    # Send notification alerts.
+                    alert(name, status, link, log)
+                    # Pause the alert until the item is out of stock again.
+                    pause_alert = True
+                
+                # If the item is out of stock, enable alerts again.
+                elif status == "out_of_stock":
+                    pause_alert = False
+
+        # If the API is not responding, log this.
+        except:
+            # Log that the API is not giving a response.
+            time_stamp = str((datetime.now()).strftime("%H:%M:%S"))
+            log.write("[" + time_stamp + "] Connection failed...\n"); log.flush()
+        
         
         # If the file size is bigger than specified, delete oldest 25%.
         log = check_logsize(log)
-
         # Wait for time interval.
         sleep(config['delay'])
     
 
     # Log that the program is stopping.
     log.write("Stopped\n")
-    log.flush()
     # Close the log file.
     log.close()
-
     
 
 
