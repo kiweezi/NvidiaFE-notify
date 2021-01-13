@@ -2,5 +2,6 @@
 
 # Remove vscode settings.
 /.vscode/
+# Remove temp files.
 /script/*.log
 /startstop.file
