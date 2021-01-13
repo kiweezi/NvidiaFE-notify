@@ -91,7 +91,7 @@ def check_logsize(log):
     return log
 
 
-def get_data():
+def get_data(log):
     # Get APIurl from config file.
     api_url = config['APIurl']
     # Set headers to use API as if from a browser.
@@ -99,10 +99,18 @@ def get_data():
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36'
     }
 
-    # Get the API response and filter it.
-    response = requests.get(api_url, headers=headers)
-    data = response.json()["searchedProducts"]["productDetails"]
+    # Try to query the API.
+    try:
+        # Get the API response and filter it.
+        response = requests.get(api_url, headers=headers)
+    # If the API is down take the exeception and log it.
+    except:
+        # Get the time and format it.
+        time_stamp = str((datetime.now()).strftime("%H:%M:%S"))
+        log.write("[" + time_stamp + "] Connection failed...")
 
+    # Refine the response.
+    data = response.json()["searchedProducts"]["productDetails"]
     # Return the data.
     return data
 
@@ -160,6 +168,8 @@ def main():
     if instruction == 'start':
         log.write("Starting...\n"); log.flush()
         set_file_flag(True)
+        # Set variable outside of the while loop.
+        pause_alert = False
 
     # If program is called to stop, set the stop flag.
     elif instruction == 'stop':
@@ -174,7 +184,7 @@ def main():
     # While the program is set to start, continue running.
     while is_flag_set():
         # Get the specified product data.
-        data = get_data()
+        data = get_data(log)
 
         # Loop through products to find status.
         for products in data:
@@ -188,9 +198,16 @@ def main():
             # Output current process and update file.
             log.writelines("[" + time_stamp + "] Checking " + name + "...\n"); log.flush()
 
-            if status != "out_of_stock":
+            # If the status is not out of stock, notify once.
+            if status != "out_of_stock" and pause_alert == False:
                 # Send notification alerts.
                 alert(name, status, link, log)
+                # Pause the alert until the item is out of stock again.
+                pause_alert = True
+            
+            # If the item is out of stock, enable alerts again.
+            elif status == "out_of_stock":
+                pause_alert = False
         
         # If the file size is bigger than specified, delete oldest 25%.
         log = check_logsize(log)
