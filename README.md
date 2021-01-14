@@ -106,6 +106,6 @@ For Windows PowerShell:
 
 
 ## Contributors
-* [HazNut](https://github.com/HazNut) - Helped with coding style and using requests + json modules. Fixed slow API requests using User-Agent header.
+* [HazNut](https://github.com/HazNut) - Greatly helped with styling and using requests, modules and general syntax. Fixed slow API requests using User-Agent header.
 
 ### Please give me issues, this is just a means of learning for me.
