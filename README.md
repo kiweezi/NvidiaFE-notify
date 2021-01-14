@@ -11,6 +11,7 @@ Notify Discord or Win10 of **European** Nvidia Founders Edition card stock. Cont
 * [Configure](#configure)
 * [Usage](#usage)
 * [Testing](#testing)
+* [Contributors](#contributors)
 <!--toc-end-->
 
 
@@ -103,5 +104,8 @@ For Windows PowerShell:
 & pythonw.exe .\bot.py test
 ```
 
+
+## Contributors
+* [HazNut](https://github.com/HazNut) - Helped with coding style and using requests + json modules. Fixed slow API requests using User-Agent header.
 
 ### Please give me issues, this is just a means of learning for me.
