@@ -16,5 +16,7 @@
 	"win10toast": {
 		"enabled": false,
 		"icon": "toast.ico"
-	}
+	},
+
+	"flagFile": "flag.file"
 }

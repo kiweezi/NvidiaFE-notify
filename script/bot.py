@@ -33,7 +33,7 @@ with open("cfg.json") as json_file:
     config = json.load(json_file)
 
 # Location of the flag file for stopping and starting through commandline.
-FLAGFILENAME = "startstop.file"
+FLAGFILENAME = os.path.abspath(config["flagFile"])
 
 # -- End --
 
