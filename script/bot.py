@@ -41,11 +41,11 @@ FLAGFILENAME = "startstop.file"
 
 # Get additional imports used in the code.
 # If discord is selected, import it.
-if (config['discord']['enabled'] == True):
+if (config["discord"]["enabled"] == True):
     from discord import Webhook, RequestsWebhookAdapter     # For discord notifications.
 
 # If win10toast is selected, import it.
-if config['win10toast']['enabled'] == True:
+if config["win10toast"]["enabled"] == True:
     from win10toast import ToastNotifier                    # For Windows 10 toast notifications.
 
 
@@ -54,7 +54,7 @@ def set_file_flag(startorstop):
     # If the flag is to be set to true, create the flag file.
     if startorstop:
         with open(FLAGFILENAME, "w") as f:
-            f.write('run')
+            f.write("run")
     # If the flag is to be set to false, delete the flag file.
     else:
         if os.path.isfile(FLAGFILENAME):
@@ -67,21 +67,21 @@ def is_flag_set():
 
 def check_logsize(log):
     # Get logfile path.
-    log_path = os.path.abspath(config['logfile']['path'])
+    log_path = os.path.abspath(config["logfile"]["path"])
     # Get current size of log file.
     file_size = (os.stat(log_path).st_size / 1000)
 
     # If the file size is bigger than specified, delete oldest 25%.
-    if file_size >= config['logfile']['maxSize']:
+    if file_size >= config["logfile"]["maxSize"]:
         # Close the file.
         log.close()
 
         # Get the lines to cut from the file.
-        with open(log_path, 'r') as fin:
+        with open(log_path, "r") as fin:
             data = fin.read().splitlines(True)
             cut = int(len(data) / 4)
         # Cut 25% of the log file lines.
-        with open(log_path, 'w') as fout:
+        with open(log_path, "w") as fout:
             fout.writelines(data[cut:])
 
         # Open the file back up again.
@@ -93,15 +93,15 @@ def check_logsize(log):
 
 def get_data(log):
     # Get APIurl from config file.
-    api_url = config['APIurl']
+    api_url = config["APIurl"]
     # Set headers to use API as if from a browser.
     headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36'
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
     }
 
     # Get the API response and filter it.
     response = requests.get(api_url, headers=headers)
-    data = response.json()["searchedProducts"]["productDetails"]
+    data = response.json()["searchedproducts"]["productDetails"]
 
     # Return the data.
     return data
@@ -115,22 +115,22 @@ def alert(name, status, link, log):
         + "[" + time_stamp + "] >>> Retailer link: " + link + "\n"); log.flush()
 
     # If discord is enabled, notify discord.
-    if config['discord']['enabled'] == True:
+    if config["discord"]["enabled"] == True:
         # Get discord configuration.
-        discord_cfg = config['discord']
+        discord_cfg = config["discord"]
 
         # Create the message for the notification.
-        message = ("**" + name + " status changed! " + " <@&" + str(discord_cfg['roleID']) + ">**\n"
+        message = ("**" + name + " status changed! " + " <@&" + str(discord_cfg["roleID"]) + ">**\n"
         + ">>> New status: `" + status + "`\n" + "Retailer link: " + link)
 
         # Create webhook and send the message.
-        webhook = Webhook.from_url(discord_cfg['webhookUrl'], adapter=RequestsWebhookAdapter())
+        webhook = Webhook.from_url(discord_cfg["webhookUrl"], adapter=RequestsWebhookAdapter())
         webhook.send(message)
 
     # If Windows 10 toast is enabled, create a toast notification.
-    if config['win10toast']['enabled'] == True:
+    if config["win10toast"]["enabled"] == True:
         # Get win10toast configuration.
-        icon_file = os.path.abspath(config['win10toast']['icon'])
+        icon_file = os.path.abspath(config["win10toast"]["icon"])
 
         # Show toast notification.
         toaster = ToastNotifier()
@@ -146,7 +146,7 @@ def alert(name, status, link, log):
 
 def main():
     # Open the log file specified and overwrite it.
-    log = open(os.path.abspath(config['logfile']['path']), "a")
+    log = open(os.path.abspath(config["logfile"]["path"]), "a")
 
     # If incorrect arguments are provided, display usage and quit.
     if len(sys.argv) < 2:
@@ -157,7 +157,7 @@ def main():
     # Store the argument used.
     instruction = sys.argv[1]
     # If program is called to start, set the start flag.
-    if instruction == 'start':
+    if instruction == "start":
         log.write("Starting...\n"); log.flush()
         set_file_flag(True)
 
@@ -170,13 +170,13 @@ def main():
             alert_status[product["displayName"]] = False
 
     # If program is called to stop, set the stop flag and exit.
-    elif instruction == 'stop':
+    elif instruction == "stop":
         log.write("Stopping...\n"); log.flush()
         set_file_flag(False)
         sys.exit()
 
     # If program is called to test, send a test alert.
-    elif instruction == 'test':
+    elif instruction == "test":
         log.write("Testing...\n"); log.flush()
         alert("Nvidia Test Card", "test_run", "https://github.com/kiweezi/NvidiaFE-notify", log)
 
@@ -222,7 +222,7 @@ def main():
         # If the file size is bigger than specified, delete oldest 25%.
         log = check_logsize(log)
         # Wait for time interval.
-        sleep(config['delay'])
+        sleep(config["delay"])
     
 
     # Log that the program is stopping.
