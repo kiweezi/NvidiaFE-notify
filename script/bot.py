@@ -163,10 +163,8 @@ def main():
 
         # Initialize default alert status for each product.
         alert_status = {}
-        # Set default alert status.
-        data = get_data(log)
         # For each product, set the default alert status.
-        for product in data:
+        for product in get_data(log):
             alert_status[product["displayName"]] = False
 
     # If program is called to stop, set the stop flag and exit.
@@ -185,11 +183,8 @@ def main():
 
         # If the API is working as intended, run the main script.
         try:
-            # Get the specified product data.
-            data = get_data(log)
-
-            # Loop through products to find status.
-            for product in data:
+            # Loop through products from data to find the status.
+            for product in get_data(log):
                 # Get the details of the product required.
                 name = product["displayName"]
                 status = product["prdStatus"]
