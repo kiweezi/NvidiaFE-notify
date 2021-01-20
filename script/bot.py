@@ -91,7 +91,7 @@ def check_logsize(log):
     return log
 
 
-def get_data(log):
+def get_data():
     # Get APIurl from config file.
     api_url = config["APIurl"]
     # Set headers to use API as if from a browser.
@@ -101,19 +101,13 @@ def get_data(log):
 
     # Get the API response and filter it.
     response = requests.get(api_url, headers=headers)
-    data = response.json()["searchedproducts"]["productDetails"]
+    data = response.json()["searchedProducts"]["productDetails"]
 
     # Return the data.
     return data
 
 
-def alert(name, status, link, log):
-    # Get the time and format it.
-    time_stamp = str((datetime.now()).strftime("%H:%M:%S"))
-    # Output current status and update.
-    log.write ("[" + time_stamp + "] >>> Status for " + name + " changed! New status: " + status + "\n"
-        + "[" + time_stamp + "] >>> Retailer link: " + link + "\n"); log.flush()
-
+def alert(name, status, link):
     # If discord is enabled, notify discord.
     if config["discord"]["enabled"] == True:
         # Get discord configuration.
@@ -164,7 +158,7 @@ def main():
         # Initialize default alert status for each product.
         alert_status = {}
         # For each product, set the default alert status.
-        for product in get_data(log):
+        for product in get_data():
             alert_status[product["displayName"]] = False
 
     # If program is called to stop, set the stop flag and exit.
@@ -176,7 +170,7 @@ def main():
     # If program is called to test, send a test alert.
     elif instruction == "test":
         log.write("Testing...\n"); log.flush()
-        alert("Nvidia Test Card", "test_run", "https://github.com/kiweezi/NvidiaFE-notify", log)
+        alert("Nvidia Test Card", "test_run", "https://github.com/kiweezi/NvidiaFE-notify")
 
     # While the program is set to start, continue running.
     while is_flag_set():
@@ -184,23 +178,31 @@ def main():
         # If the API is working as intended, run the main script.
         try:
             # Loop through products from data to find the status.
-            for product in get_data(log):
+            for product in get_data():
                 # Get the details of the product required.
                 name = product["displayName"]
                 status = product["prdStatus"]
                 link = product["retailers"][0]["purchaseLink"]
 
                 # Get the time and format it.
-                time_stamp = (datetime.now()).strftime("%H:%M:%S")
+                time_stamp = str((datetime.now()).strftime("%H:%M:%S"))
                 # Output current process and update file.
                 log.writelines("[" + time_stamp + "] Checking " + name + "...\n"); log.flush()
 
-                # If the status is not out of stock, notify once.
-                if status != "out_of_stock" and alert_status[name] == False:
-                    # Send notification alerts.
-                    alert(name, status, link, log)
-                    # Set timeout for alert.
-                    alert_status[name] = True
+                # If the status is not out of stock, notify once, but log until out of stock again.
+                if status != "out_of_stock":
+                    # Get the time and format it.
+                    time_stamp = str((datetime.now()).strftime("%H:%M:%S"))
+                    # Output current status and update.
+                    log.write ("[" + time_stamp + "] >>> Status for " + name + " changed! New status: " + status + "\n"
+                        + "[" + time_stamp + "] >>> Retailer link: " + link + "\n"); log.flush()
+                    
+                    # Alert once, then disable alert until the item is back in stock
+                    if alert_status[name] == False:
+                        # Send notification alerts.
+                        alert(name, status, link)
+                        # Set timeout for alert.
+                        alert_status[name] = True
                 
                 # If the item is out of stock, enable alerts again.
                 elif status == "out_of_stock" and alert_status[name] == True:
