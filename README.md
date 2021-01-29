@@ -1,3 +1,6 @@
+[![made-with-python](https://img.shields.io/badge/Made%20with-Python-informational)](https://www.python.org/)
+[![Build-Status](https://img.shields.io/github/workflow/status/kiweezi/NvidiaFE-notify/Python%20application)](https://github.com/kiweezi/NvidiaFE-notify/actions?query=workflow%3A%22Python+application%22)
+
 **This is a personal project of mine, it is by no means stable and I have no idea what I'm doing. A much more stable and flexible alternative can be found [HERE](https://github.com/samuelm2/Nvidia-Notify).**
 
 # NvidiaFE-notify
@@ -27,7 +30,7 @@ Notify Discord or Win10 of **European** Nvidia Founders Edition card stock. Cont
 ## Setup
 1. Clone/Download the /script folder to your prefered location
 2. Install dependancies with pip
-    -  `pip install -r requirements.txt` or `python -m pip install -r requirements.txt`
+    - `pip install -r requirements.txt` or `python -m pip install -r requirements.txt`
     - If running windows, use `win-requirements.txt` instead.
     - On some Linux/Mac systems, you may need to use `python3` and `pip3` instead of `python` and `pip`, respectively.
 3. Configure the `cfg.json` file
