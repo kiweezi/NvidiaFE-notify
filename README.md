@@ -1,3 +1,6 @@
+[![made-with-python](https://img.shields.io/badge/Made%20with-Python-informational)](https://www.python.org/)
+[![Build-Status](https://img.shields.io/github/workflow/status/kiweezi/NvidiaFE-notify/Python%20application)](https://github.com/kiweezi/NvidiaFE-notify/actions?query=workflow%3A%22Python+application%22)
+
 **This is a personal project of mine, it is by no means stable and I have no idea what I'm doing. A much more stable and flexible alternative can be found [HERE](https://github.com/samuelm2/Nvidia-Notify).**
 
 # NvidiaFE-notify
