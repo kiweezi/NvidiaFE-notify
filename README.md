@@ -30,7 +30,7 @@ Notify Discord or Win10 of **European** Nvidia Founders Edition card stock. Cont
 ## Setup
 1. Clone/Download the /script folder to your prefered location
 2. Install dependancies with pip
-    -  `pip install -r requirements.txt` or `python -m pip install -r requirements.txt`
+    - `pip install -r requirements.txt` or `python -m pip install -r requirements.txt`
     - If running windows, use `win-requirements.txt` instead.
     - On some Linux/Mac systems, you may need to use `python3` and `pip3` instead of `python` and `pip`, respectively.
 3. Configure the `cfg.json` file
