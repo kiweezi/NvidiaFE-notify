@@ -135,18 +135,11 @@ def alert(name, status, link):
         threaded=True)
 
 
-
-# -- Main --
-
-def main():
-    # Open the log file specified and overwrite it.
-    log = open(os.path.abspath(config["logfile"]["path"]), "a")
-
+def get_instruction(log):
     # If incorrect arguments are provided, display usage and quit.
     if len(sys.argv) < 2:
         message = "Usage: <program> start|stop|test\n"
         log.write(message); log.flush()
-        sys.exit()
     
     # Store the argument used.
     instruction = sys.argv[1]
@@ -160,22 +153,36 @@ def main():
         # For each product, set the default alert status.
         for product in get_data():
             alert_status[product["displayName"]] = False
+        # Return to the main script with the alert status.
+        return alert_status
 
     # If program is called to stop, set the stop flag and exit.
     elif instruction == "stop":
         log.write("Stopping...\n"); log.flush()
         set_file_flag(False)
-        sys.exit()
 
     # If program is called to test, send a test alert.
     elif instruction == "test":
         log.write("Testing...\n"); log.flush()
         alert("Nvidia Test Card", "test_run", "https://github.com/kiweezi/NvidiaFE-notify")
 
+    # Quit the program.
+    sys.exit()
+
+
+
+# -- Main --
+
+def main():
+    # Open the log file specified and overwrite it.
+    log = open(os.path.abspath(config["logfile"]["path"]), "a")
+
+    # Get the instruction given when executing the script.
+    alert_status = get_instruction(log)
+
     # While the program is set to start, continue running.
     while is_flag_set():
-
-        # If the API is working as intended, run the main script.
+        # If the API is working as intended, run the get_instruction script.
         try:
             # Loop through products from data to find the status.
             for product in get_data():
@@ -187,7 +194,7 @@ def main():
                 # Get the time and format it.
                 time_stamp = str((datetime.now()).strftime("%H:%M:%S"))
                 # Output current process and update file.
-                log.writelines("[" + time_stamp + "] Checking " + name + "...\n"); log.flush()
+                log.write ("[" + time_stamp + "] Checking " + name + "...\n"); log.flush()
 
                 # If the status is not out of stock, notify once, but log until out of stock again.
                 if status != "out_of_stock":
@@ -215,7 +222,7 @@ def main():
             time_stamp = str((datetime.now()).strftime("%H:%M:%S"))
             log.write("[" + time_stamp + "] Connection failed...\n"); log.flush()
         
-        
+
         # If the file size is bigger than specified, delete oldest 25%.
         log = check_logsize(log)
         # Wait for time interval.
@@ -226,10 +233,10 @@ def main():
     log.write("Stopped\n")
     # Close the log file.
     log.close()
-    
 
 
-# Call the main code.
+
+# Call the get_instruction code.
 if __name__ == "__main__":
     main()
 
