@@ -35,6 +35,23 @@ Notify Discord or Win10 of **European** Nvidia Founders Edition card stock. Cont
     - On some Linux/Mac systems, you may need to use `python3` and `pip3` instead of `python` and `pip`, respectively.
 3. Configure the `cfg.json` file
     - [Guide here](#configure).
+4. Set up a method to control the bot like [tmux](https://www.howtogeek.com/671422/how-to-use-tmux-on-linux-and-why-its-better-than-screen/) or a [systemd service](https://medium.com/codex/setup-a-python-script-as-a-service-through-systemctl-systemd-f0cc55a42267) (optional):
+```
+# nvidiafe-notify.service
+# Put me in /etc/systemd/system/
+
+[Unit]
+Description=NvidiaFE-notify bot
+After=multi-user.target
+
+[Service]
+User=<username>
+WorkingDirectory=/home/<username>/NvidiaFE-notify/script
+ExecStart=/usr/bin/python3 /home/<username>/NvidiaFE-notify/script/bot.py
+
+[Install]
+WantedBy=multi-user.target
+```
 
 
 ## Configure
@@ -82,29 +99,26 @@ It is recommended that you enable at least one notification method, as the progr
 
 
 ## Usage
-NvidiaFE-notify is a command line tool. Use arguments `start` and `stop` to start and stop the script from running.
-The script must be run in the background on a separate thread as to not pause the command line.
+NvidiaFE-notify is a command line tool. It's intended usage is as a linux [systemd service](https://medium.com/codex/setup-a-python-script-as-a-service-through-systemctl-systemd-f0cc55a42267).
+The bot can also be executed through the shell, therefore [tmux](https://www.howtogeek.com/671422/how-to-use-tmux-on-linux-and-why-its-better-than-screen/) can also be used.
 
-In Linux bash the script can be started with the `&` character at the end:
+### Systemd service
+In linux, using the systemd service, the bot can be started with the following:
 ```console
-python bot.py start &
-```
-In Windows the script can be stopped in PowerShell by using `pythonw.exe`, which allows the script to run silently.
-```powershell
-& pythonw.exe .\bot.py stop
+sudo systemctl start nvidiafe-notify
 ```
 
+### Commandline
+The bot can still be executed throught the shell on Windows and Linux systems. This is where you will need to be a bit more creative, however.
+The main issue is stopping the bot. This will need to be done by ending the process manually.
 
-## Testing
-The `test` argument can be provided to the script to test the alerts currently configured in `cfg.json`.
-
-For Linux bash:
+In Linux bash the script can be started with the `&` character at the end while the ssh session is active:
 ```console
-python bot.py test &
+python bot.py &
 ```
-For Windows PowerShell:
+In Windows the script can be started in PowerShell by using `pythonw.exe`, which allows the script to run silently.
 ```powershell
-& pythonw.exe .\bot.py test
+& pythonw .\bot.py
 ```
 
 
