@@ -50,21 +50,6 @@ if config["win10toast"]["enabled"] == True:
 
 
 
-def set_file_flag(startorstop):
-    # If the flag is to be set to true, create the flag file.
-    if startorstop:
-        with open(FLAGFILENAME, "w") as f:
-            f.write("run")
-    # If the flag is to be set to false, delete the flag file.
-    else:
-        if os.path.isfile(FLAGFILENAME):
-            os.unlink(FLAGFILENAME)
-
-def is_flag_set():
-    # Return if the file exists.
-    return os.path.isfile(FLAGFILENAME)
-
-
 def check_logsize(log):
     # Get logfile path.
     log_path = os.path.abspath(config["logfile"]["path"])
@@ -135,41 +120,6 @@ def alert(name, status, link):
         threaded=True)
 
 
-def get_instruction(log):
-    # If incorrect arguments are provided, display usage and quit.
-    if len(sys.argv) < 2:
-        message = "Usage: <program> start|stop|test\n"
-        log.write(message); log.flush()
-    
-    # Store the argument used.
-    instruction = sys.argv[1]
-    # If program is called to start, set the start flag.
-    if instruction == "start":
-        log.write("Starting...\n"); log.flush()
-        set_file_flag(True)
-
-        # Initialize default alert status for each product.
-        alert_status = {}
-        # For each product, set the default alert status.
-        for product in get_data():
-            alert_status[product["displayName"]] = False
-        # Return to the main script with the alert status.
-        return alert_status
-
-    # If program is called to stop, set the stop flag and exit.
-    elif instruction == "stop":
-        log.write("Stopping...\n"); log.flush()
-        set_file_flag(False)
-
-    # If program is called to test, send a test alert.
-    elif instruction == "test":
-        log.write("Testing...\n"); log.flush()
-        alert("Nvidia Test Card", "test_run", "https://github.com/kiweezi/NvidiaFE-notify")
-
-    # Quit the program.
-    sys.exit()
-
-
 
 # -- Main --
 
@@ -177,62 +127,69 @@ def main():
     # Open the log file specified and overwrite it.
     log = open(os.path.abspath(config["logfile"]["path"]), "a")
 
-    # Get the instruction given when executing the script.
-    alert_status = get_instruction(log)
+    # Initialize default alert status for each product.
+    alert_status = {}
+    # For each product, set the default alert status.
+    for product in get_data():
+        alert_status[product["displayName"]] = False
 
-    # While the program is set to start, continue running.
-    while is_flag_set():
-        # If the API is working as intended, run the get_instruction script.
-        try:
-            # Loop through products from data to find the status.
-            for product in get_data():
-                # Get the details of the product required.
-                name = product["displayName"]
-                status = product["prdStatus"]
-                link = product["retailers"][0]["purchaseLink"]
+    # Log that the program is starting.
+    log.write("Starting...\n"); log.flush()
 
-                # Get the time and format it.
-                time_stamp = str((datetime.now()).strftime("%H:%M:%S"))
-                # Output current process and update file.
-                log.write ("[" + time_stamp + "] Checking " + name + "...\n"); log.flush()
+    # Loop as long as keyboard interrupt is not triggered.
+    try:
+        while True:
+            # If the API is working as intended, run the get_instruction script.
+            try:
+                # Loop through products from data to find the status.
+                for product in get_data():
+                    # Get the details of the product required.
+                    name = product["displayName"]
+                    status = product["prdStatus"]
+                    link = product["retailers"][0]["purchaseLink"]
 
-                # If the status is not out of stock, notify once, but log until out of stock again.
-                if status != "out_of_stock":
                     # Get the time and format it.
                     time_stamp = str((datetime.now()).strftime("%H:%M:%S"))
-                    # Output current status and update.
-                    log.write ("[" + time_stamp + "] >>> Status for " + name + " changed! New status: " + status + "\n"
-                        + "[" + time_stamp + "] >>> Retailer link: " + link + "\n"); log.flush()
+                    # Output current process and update file.
+                    log.write ("[" + time_stamp + "] Checking " + name + "...\n"); log.flush()
+
+                    # If the status is not out of stock, notify once, but log until out of stock again.
+                    if status != "out_of_stock":
+                        # Get the time and format it.
+                        time_stamp = str((datetime.now()).strftime("%H:%M:%S"))
+                        # Output current status and update.
+                        log.write ("[" + time_stamp + "] >>> Status for " + name + " changed! New status: " + status + "\n"
+                            + "[" + time_stamp + "] >>> Retailer link: " + link + "\n"); log.flush()
+                        
+                        # Alert once, then disable alert until the item is back in stock
+                        if alert_status[name] == False:
+                            # Send notification alerts.
+                            alert(name, status, link)
+                            # Set timeout for alert.
+                            alert_status[name] = True
                     
-                    # Alert once, then disable alert until the item is back in stock
-                    if alert_status[name] == False:
-                        # Send notification alerts.
-                        alert(name, status, link)
-                        # Set timeout for alert.
-                        alert_status[name] = True
-                
-                # If the item is out of stock, enable alerts again.
-                elif status == "out_of_stock" and alert_status[name] == True:
-                    # Disable timeout for alert.
-                    alert_status[name] = False
+                    # If the item is out of stock, enable alerts again.
+                    elif status == "out_of_stock" and alert_status[name] == True:
+                        # Disable timeout for alert.
+                        alert_status[name] = False
 
-        # If the API is not responding, log this.
-        except:
-            # Log that the API is not giving a response.
-            time_stamp = str((datetime.now()).strftime("%H:%M:%S"))
-            log.write("[" + time_stamp + "] Connection failed...\n"); log.flush()
-        
-
-        # If the file size is bigger than specified, delete oldest 25%.
-        log = check_logsize(log)
-        # Wait for time interval.
-        sleep(config["delay"])
+            # If the API is not responding, log this.
+            except:
+                # Log that the API is not giving a response.
+                time_stamp = str((datetime.now()).strftime("%H:%M:%S"))
+                log.write("[" + time_stamp + "] Connection failed...\n"); log.flush()
+            
+            # If the file size is bigger than specified, delete oldest 25%.
+            log = check_logsize(log)
+            # Wait for time interval.
+            sleep(config["delay"])
     
-
-    # Log that the program is stopping.
-    log.write("Stopped\n")
-    # Close the log file.
-    log.close()
+    # Loop as long as keyboard interrupt is not triggered.
+    except KeyboardInterrupt:
+        # Log that the program is stopping.
+        log.write("Stopped\n"); log.flush()
+        # Close the log file.
+        log.close()
 
 
 
