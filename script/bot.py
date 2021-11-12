@@ -20,7 +20,7 @@ import json                                             # For handling json.
 import os                                               # For handling file paths and sizes.
 import sys                                              # For arguments and script control.
 from time import sleep                                  # For delay interval.
-from datetime import datetime                           # For displaying the system time.
+from datetime import datetime, timezone                 # For displaying the system time.
 
 # -- End --
 
@@ -31,9 +31,6 @@ from datetime import datetime                           # For displaying the sys
 # Get the URL for the API request from the json file.
 with open("cfg.json") as json_file:
     config = json.load(json_file)
-
-# Location of the flag file for stopping and starting through commandline.
-FLAGFILENAME = os.path.abspath(config["flagFile"])
 
 # -- End --
 
@@ -81,7 +78,7 @@ def get_data():
     api_url = config["APIurl"]
     # Set headers to use API as if from a browser.
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:94.0) Gecko/20100101 Firefox/94.0"
     }
 
     # Get the API response and filter it.
@@ -120,6 +117,16 @@ def alert(name, status, link):
         threaded=True)
 
 
+def logOut(message, log):
+    # Get strftime format.
+    logTimeFormat = config["logfile"]["dateFormat"]
+    # Get the time and format it.
+    time_stamp = str((datetime.now(timezone.utc)).strftime(logTimeFormat))
+    # Write the log to the file.
+    log.write("[" + time_stamp + "] " + message)
+    log.flush()
+
+
 
 # -- Main --
 
@@ -134,7 +141,7 @@ def main():
         alert_status[product["displayName"]] = False
 
     # Log that the program is starting.
-    log.write("Starting...\n"); log.flush()
+    logOut("Starting...\n", log)
 
     # Loop as long as keyboard interrupt is not triggered.
     try:
@@ -148,18 +155,14 @@ def main():
                     status = product["prdStatus"]
                     link = product["retailers"][0]["purchaseLink"]
 
-                    # Get the time and format it.
-                    time_stamp = str((datetime.now()).strftime("%H:%M:%S"))
-                    # Output current process and update file.
-                    log.write ("[" + time_stamp + "] Checking " + name + "...\n"); log.flush()
+                    # Log current process.
+                    logOut("Checking " + name + "...\n", log)
 
                     # If the status is not out of stock, notify once, but log until out of stock again.
                     if status != "out_of_stock":
-                        # Get the time and format it.
-                        time_stamp = str((datetime.now()).strftime("%H:%M:%S"))
-                        # Output current status and update.
-                        log.write ("[" + time_stamp + "] >>> Status for " + name + " changed! New status: " + status + "\n"
-                            + "[" + time_stamp + "] >>> Retailer link: " + link + "\n"); log.flush()
+                        # Log that the status has changed.
+                        logOut(">>> Status for " + name + " changed! New status: " + status + "\n", log)
+                        logOut(">>> Retailer link: " + link + "\n", log)
                         
                         # Alert once, then disable alert until the item is back in stock
                         if alert_status[name] == False:
@@ -175,9 +178,8 @@ def main():
 
             # If the API is not responding, log this.
             except:
-                # Log that the API is not giving a response.
-                time_stamp = str((datetime.now()).strftime("%H:%M:%S"))
-                log.write("[" + time_stamp + "] Connection failed...\n"); log.flush()
+                # Log current process.
+                logOut("Connection failed...\n", log)
             
             # If the file size is bigger than specified, delete oldest 25%.
             log = check_logsize(log)
@@ -187,7 +189,7 @@ def main():
     # Loop as long as keyboard interrupt is not triggered.
     except KeyboardInterrupt:
         # Log that the program is stopping.
-        log.write("Stopped\n"); log.flush()
+        logOut("Stopped...\n", log)
         # Close the log file.
         log.close()
 
