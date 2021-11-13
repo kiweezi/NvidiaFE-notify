@@ -41,8 +41,8 @@ Notify Discord or Win10 of **European** Nvidia Founders Edition card stock. Cont
 4. Set up a method to control the bot like [tmux](https://www.howtogeek.com/671422/how-to-use-tmux-on-linux-and-why-its-better-than-screen/) or a [systemd service](https://medium.com/codex/setup-a-python-script-as-a-service-through-systemctl-systemd-f0cc55a42267) (optional):
 
 ```
-# nvidiafe-notify.service
 # Put me in /etc/systemd/system/
+# Change the 'WorkingDirectory' and 'ExecStart' paths
 
 [Unit]
 Description=NvidiaFE-notify bot
@@ -50,11 +50,13 @@ After=multi-user.target
 
 [Service]
 User=<username>
-WorkingDirectory=/home/<username>/NvidiaFE-notify/script
-ExecStart=/usr/bin/python3 /home/<username>/NvidiaFE-notify/script/bot.py
+WorkingDirectory=/path/to/directory/NvidiaFE-notify/script/
+ExecStart=/usr/bin/python3 /path/to/script/NvidiaFE-notify/script/bot.py
+KillSignal=SIGINT
 
 [Install]
 WantedBy=multi-user.target
+Alias=nvidiafe-notify
 ```
 
 ## Configure
@@ -112,7 +114,7 @@ It is recommended that you enable at least one notification method, as the progr
 
 ## Usage
 
-NvidiaFE-notify is a command line tool. It's intended usage is as a linux [systemd service](https://medium.com/codex/setup-a-python-script-as-a-service-through-systemctl-systemd-f0cc55a42267), a template can be found [here](https://github.com/kiweezi/NvidiaFE-notify/blob/main/nvidiafe-notify.service).
+NvidiaFE-notify is a command line tool. It's intended usage is as a linux [systemd service](https://medium.com/codex/setup-a-python-script-as-a-service-through-systemctl-systemd-f0cc55a42267), a template can be found [here](#setup).
 The bot can also be executed through the shell, therefore [tmux](https://www.howtogeek.com/671422/how-to-use-tmux-on-linux-and-why-its-better-than-screen/) can also be used.
 
 ### Systemd service
