@@ -42,7 +42,7 @@ Notify Discord or Win10 of **European** Nvidia Founders Edition card stock. Cont
 
 ```
 # Put me in /etc/systemd/system/
-# Change the 'WorkingDirectory' and 'ExecStart' paths
+# Change the username value, 'WorkingDirectory' and 'ExecStart' paths
 
 [Unit]
 Description=NvidiaFE-notify bot
